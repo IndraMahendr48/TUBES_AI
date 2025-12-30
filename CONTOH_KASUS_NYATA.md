@@ -1,173 +1,334 @@
-# 📦 Contoh Kasus Nyata - Pencarian Median
+# 💼 Contoh Kasus Nyata - Sistem E-Commerce
+## Mencari Harga Median Produk untuk Menampilkan Harga Representatif
 
-## 🎯 Use Case: Sistem Penjualan Online
+---
 
-### **Studi Kasus: Mencari Harga Median Produk**
+## 🎯 Skenario: Sistem Penjualan Online
 
-**Skenario:**
-Sebuah toko online ingin menampilkan **harga median** dari semua produk dalam satu kategori untuk memberikan gambaran harga rata-rata kepada pelanggan.
+### **Deskripsi Masalah:**
 
-**Contoh:** Kategori "Laptop"
-- Produk sudah diurutkan berdasarkan harga (dari termurah ke termahal)
-- Kebutuhan: Tampilkan harga median untuk membantu customer menentukan budget
+Sebuah platform e-commerce besar (seperti Tokopedia, Shopee, atau Amazon) ingin menampilkan **harga median** dari semua produk dalam satu kategori kepada customer. Harga median digunakan karena:
 
-**Implementasi:**
-```python
-# Daftar harga laptop yang sudah terurut (dalam juta rupiah)
-harga_laptop = [5, 7, 8, 10, 12, 15, 18, 20, 25, 30]
+1. **Lebih representatif** dibanding rata-rata (mean)
+2. **Tidak dipengaruhi outlier** (produk super mahal atau super murah)
+3. **Memberikan gambaran harga tengah-tengah** yang lebih akurat
+4. **Membantu customer menentukan budget** dengan lebih baik
 
-# Cari harga median menggunakan algoritma iteratif
-harga_median = median_iterative(harga_laptop)
-print(f"Harga median laptop: Rp {harga_median} juta")
-# Output: Harga median laptop: Rp 13.5 juta
+### **Contoh Konkret:**
+
+**Kategori Produk:** Laptop Gaming
+**Data Harga (dalam juta rupiah):** `[8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 50, 70]`
+
+**Pertanyaan:** Berapa harga median laptop gaming yang harus ditampilkan kepada customer?
+
+**Jawaban yang Diinginkan:** Harga median = **22.5 juta rupiah**
+
+---
+
+## 📊 Penjelasan Data
+
+### **Array Harga yang Sudah Terurut:**
+```
+Indeks:   0    1    2    3    4    5    6    7    8    9   10   11
+Harga:   [8,  10,  12,  15,  18,  20,  25,  30,  35,  40,  50,  70]
+         (dalam juta rupiah)
 ```
 
+**Karakteristik:**
+- Jumlah produk (n) = 12
+- Data sudah terurut dari harga termurah (8 juta) ke termahal (70 juta)
+- Karena n genap, median adalah rata-rata dua elemen tengah
+
 ---
 
-## 🎯 Use Case: Sistem Rating Produk
+## 🔵 Solusi dengan Algoritma Iteratif
 
-### **Studi Kasus: Menentukan Rating Median**
+### **Algoritma Iteratif: Menggunakan Loop**
 
-**Skenario:**
-Platform e-commerce ingin menampilkan **rating median** dari semua review produk untuk memberikan representasi yang lebih adil dibanding rata-rata.
-
-**Contoh:** Produk "Smartphone X"
-- Semua rating diurutkan dari terendah ke tertinggi
-- Rating median lebih representatif karena tidak dipengaruhi outlier (rating ekstrem)
-
-**Implementasi:**
-```python
-# Rating produk yang sudah diurutkan (1-5 bintang)
-ratings = [1, 2, 3, 3, 4, 4, 4, 5, 5, 5]
-
-# Cari rating median
-rating_median = median_iterative(ratings)
-print(f"Rating median: {rating_median} bintang")
-# Output: Rating median: 4.0 bintang
+**Pseudocode:**
+```
+FUNCTION median_iterative(harga_array):
+    n = LENGTH(harga_array)
+    
+    IF n == 0:
+        RETURN None
+    IF n == 1:
+        RETURN harga_array[0]
+    
+    middle_index = n // 2  // 12 // 2 = 6
+    
+    // Loop dari 0 sampai middle_index
+    current_val = None
+    FOR i FROM 0 TO middle_index:
+        current_val = harga_array[i]
+    
+    IF n MOD 2 == 0:  // Genap
+        val1 = harga_array[middle_index - 1]  // arr[5] = 20
+        val2 = current_val  // arr[6] = 25
+        RETURN (val1 + val2) / 2.0  // (20 + 25) / 2 = 22.5
+    ELSE:  // Ganjil
+        RETURN current_val
 ```
 
+### **Trace Algoritma Iteratif untuk Data Laptop Gaming:**
+
+**Input:** `harga = [8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 50, 70]`
+**n = 12**
+
+**Step-by-Step Execution:**
+
+| Step | Operasi | Nilai | Penjelasan |
+|------|---------|-------|------------|
+| 1 | `n = len(harga)` | `n = 12` | Hitung jumlah produk |
+| 2 | `if n == 0:` | `False` | Skip (ada 12 produk) |
+| 3 | `if n == 1:` | `False` | Skip (bukan 1 produk) |
+| 4 | `middle_index = 12 // 2` | `middle_index = 6` | Indeks tengah = 6 |
+| 5 | **LOOP:** `for i in range(7)` | **i = 0, 1, 2, 3, 4, 5, 6** | **Loop 7 kali** |
+
+**Detail Loop:**
+
+| Iterasi | i | Operasi | `current_val = harga[i]` | Nilai |
+|---------|---|---------|--------------------------|-------|
+| 1 | 0 | `harga[0]` | `current_val = 8` | 8 juta |
+| 2 | 1 | `harga[1]` | `current_val = 10` | 10 juta |
+| 3 | 2 | `harga[2]` | `current_val = 12` | 12 juta |
+| 4 | 3 | `harga[3]` | `current_val = 15` | 15 juta |
+| 5 | 4 | `harga[4]` | `current_val = 18` | 18 juta |
+| 6 | 5 | `harga[5]` | `current_val = 20` | 20 juta |
+| 7 | 6 | `harga[6]` | `current_val = 25` | 25 juta ✓ |
+
+**Setelah Loop:**
+- `current_val = 25` (harga pada indeks 6)
+
+**Karena n genap (12):**
+- `val1 = harga[6 - 1] = harga[5] = 20`
+- `val2 = current_val = 25`
+- `median = (20 + 25) / 2.0 = 22.5`
+
+**Output:** `22.5 juta rupiah`
+
+### **Analisis Kompleksitas Iteratif:**
+
+- **Kompleksitas Waktu:** O(N)
+  - Loop berjalan (n//2 + 1) kali = (12//2 + 1) = 7 kali
+  - Untuk n=12: 7 iterasi
+  - Untuk n=1000: ~501 iterasi
+  - Proporsional dengan n → O(N)
+
+- **Kompleksitas Ruang:** O(1)
+  - Hanya menggunakan variabel: `n`, `middle_index`, `current_val`, `val1`, `val2`
+  - Tidak ada struktur data tambahan
+  - Ruang konstan, tidak bergantung pada n
+
+- **Operasi Dasar:**
+  - Akses array `harga[i]`: 7 kali (dalam loop)
+  - Total operasi: ~10-15 operasi untuk n=12
+
 ---
 
-## 🎯 Use Case: Analisis Data Penjualan
+## 🟠 Solusi dengan Algoritma Rekursif
 
-### **Studi Kasus: Mencari Median Penjualan Harian**
+### **Algoritma Rekursif: Menggunakan Rekursi**
 
-**Skenario:**
-Manager toko ingin mengetahui **median penjualan harian** dalam sebulan untuk:
-- Menentukan target penjualan yang realistis
-- Membandingkan performa hari tertentu dengan median
-- Perencanaan stok barang
-
-**Contoh:** Penjualan bulan Desember (30 hari)
-- Data penjualan harian sudah diurutkan
-- Median menunjukkan nilai tengah yang tidak dipengaruhi hari promosi ekstrem
-
-**Implementasi:**
-```python
-# Penjualan harian yang sudah diurutkan (dalam juta rupiah)
-penjualan_harian = [5, 8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 50, ...]
-
-# Cari median penjualan
-median_penjualan = median_iterative(penjualan_harian)
-print(f"Median penjualan harian: Rp {median_penjualan} juta")
+**Pseudocode:**
+```
+FUNCTION median_recursive(harga_array):
+    n = LENGTH(harga_array)
+    
+    IF n == 0:
+        RETURN None
+    IF n == 1:
+        RETURN harga_array[0]
+    
+    target_index = n // 2  // 12 // 2 = 6
+    
+    FUNCTION find_element(current_idx, target_idx):
+        IF current_idx == target_idx:
+            RETURN harga_array[current_idx]
+        RETURN find_element(current_idx + 1, target_idx)
+    
+    result = find_element(0, target_index)  // Mulai dari index 0
+    
+    IF n MOD 2 == 0:  // Genap
+        val1 = harga_array[target_index - 1]  // arr[5] = 20
+        val2 = result  // arr[6] = 25
+        RETURN (val1 + val2) / 2.0  // (20 + 25) / 2 = 22.5
+    ELSE:  // Ganjil
+        RETURN result
 ```
 
----
+### **Trace Algoritma Rekursif untuk Data Laptop Gaming:**
 
-## 🎯 Use Case: Sistem Rekomendasi Harga
+**Input:** `harga = [8, 10, 12, 15, 18, 20, 25, 30, 35, 40, 50, 70]`
+**n = 12, target_index = 6**
 
-### **Studi Kasus: Menentukan Harga Jual Optimal**
-
-**Skenario:**
-Marketplace ingin membantu seller menentukan harga jual dengan menampilkan **median harga kompetitor** untuk produk sejenis.
-
-**Contoh:** Seller ingin menjual "Earphone Bluetooth"
-- Sistem mengumpulkan semua harga produk sejenis
-- Data diurutkan dan ditampilkan median untuk referensi
-
-**Implementasi:**
-```python
-# Harga kompetitor yang sudah diurutkan
-harga_kompetitor = [150000, 200000, 250000, 300000, 350000, 400000]
-
-# Cari harga median untuk rekomendasi
-harga_rekomendasi = median_iterative(harga_kompetitor)
-print(f"Harga median pasar: Rp {harga_rekomendasi:,.0f}")
-# Output: Harga median pasar: Rp 275,000
+**Trace Rekursi `find_element(0, 6)`:**
+```
+═══════════════════════════════════════════════════════════════
+CALL 1: find_element(current_index=0, target_idx=6)
+═══════════════════════════════════════════════════════════════
+├─ Check: 0 == 6? → FALSE ❌
+├─ Operasi: 1 perbandingan
+└─ Rekursi: find_element(0 + 1, 6) = find_element(1, 6)
+   
+   ═══════════════════════════════════════════════════════════
+   CALL 2: find_element(current_index=1, target_idx=6)
+   ═══════════════════════════════════════════════════════════
+   ├─ Check: 1 == 6? → FALSE ❌
+   ├─ Operasi: 1 perbandingan
+   └─ Rekursi: find_element(1 + 1, 6) = find_element(2, 6)
+      
+      ═══════════════════════════════════════════════════════════
+      CALL 3: find_element(current_index=2, target_idx=6)
+      ═══════════════════════════════════════════════════════════
+      ├─ Check: 2 == 6? → FALSE ❌
+      ├─ Operasi: 1 perbandingan
+      └─ Rekursi: find_element(2 + 1, 6) = find_element(3, 6)
+         
+         ═══════════════════════════════════════════════════════════
+         CALL 4: find_element(current_index=3, target_idx=6)
+         ═══════════════════════════════════════════════════════════
+         ├─ Check: 3 == 6? → FALSE ❌
+         ├─ Operasi: 1 perbandingan
+         └─ Rekursi: find_element(3 + 1, 6) = find_element(4, 6)
+            
+            ═══════════════════════════════════════════════════════════
+            CALL 5: find_element(current_index=4, target_idx=6)
+            ═══════════════════════════════════════════════════════════
+            ├─ Check: 4 == 6? → FALSE ❌
+            ├─ Operasi: 1 perbandingan
+            └─ Rekursi: find_element(4 + 1, 6) = find_element(5, 6)
+               
+               ═══════════════════════════════════════════════════════════
+               CALL 6: find_element(current_index=5, target_idx=6)
+               ═══════════════════════════════════════════════════════════
+               ├─ Check: 5 == 6? → FALSE ❌
+               ├─ Operasi: 1 perbandingan
+               └─ Rekursi: find_element(5 + 1, 6) = find_element(6, 6)
+                  
+                  ═══════════════════════════════════════════════════════════
+                  CALL 7: find_element(current_index=6, target_idx=6) ✓ BASE CASE
+                  ═══════════════════════════════════════════════════════════
+                  ├─ Check: 6 == 6? → TRUE ✓
+                  ├─ Operasi: 1 perbandingan, 1 akses array
+                  └─ Return: harga[6] = 25
+                     └─ Value: 25 juta
 ```
 
----
-
-## 🎯 Use Case: Analisis Waktu Pengiriman
-
-### **Studi Kasus: Estimasi Waktu Pengiriman**
-
-**Skenario:**
-Service pengiriman ingin memberikan estimasi waktu yang lebih akurat dengan menggunakan **median waktu pengiriman** dari data historis.
-
-**Contoh:** Pengiriman Jakarta-Bandung
-- Data waktu pengiriman (dalam jam) sudah diurutkan
-- Median lebih representatif dibanding rata-rata
-
-**Implementasi:**
-```python
-# Waktu pengiriman historis yang sudah diurutkan (jam)
-waktu_pengiriman = [6, 8, 10, 12, 14, 16, 18, 20, 24, 30]
-
-# Cari median waktu pengiriman
-median_waktu = median_iterative(waktu_pengiriman)
-print(f"Estimasi waktu pengiriman: {median_waktu} jam")
-# Output: Estimasi waktu pengiriman: 15.0 jam
+**Return Chain:**
+```
+Call 7 → Return 25
+  ↓
+Call 6 → Return 25
+  ↓
+Call 5 → Return 25
+  ↓
+Call 4 → Return 25
+  ↓
+Call 3 → Return 25
+  ↓
+Call 2 → Return 25
+  ↓
+Call 1 → Return 25
+  ↓
+result = 25
 ```
 
----
+**Setelah Rekursi:**
+- `result = 25` (harga pada indeks 6)
 
-## 🎯 Use Case: Sistem Pencarian Barang
+**Karena n genap (12):**
+- `val1 = harga[6 - 1] = harga[5] = 20`
+- `val2 = result = 25`
+- `median = (20 + 25) / 2.0 = 22.5`
 
-### **Studi Kasus: Menemukan Produk di Tengah Rentang Harga**
+**Output:** `22.5 juta rupiah`
 
-**Skenario:**
-Customer ingin mencari produk dengan filter "harga tengah-tengah" dari kategori tertentu.
+### **Analisis Kompleksitas Rekursif:**
 
-**Contoh:** Customer mencari "Kamera DSLR"
-- Sistem menampilkan produk dengan harga yang berada di tengah rentang harga semua produk
-- Produk sudah terurut berdasarkan harga
+- **Kompleksitas Waktu:** O(N)
+  - Rekursi dipanggil (target_index + 1) kali = (6 + 1) = 7 kali
+  - Untuk n=12: 7 panggilan rekursif
+  - Untuk n=1000: ~501 panggilan rekursif
+  - Proporsional dengan n → O(N)
 
-**Implementasi:**
-```python
-# Harga semua kamera yang sudah diurutkan
-harga_kamera = [3000000, 4000000, 5000000, 6000000, 7000000, 8000000, 10000000]
+- **Kompleksitas Ruang:** O(N)
+  - Setiap panggilan rekursif menambahkan frame ke call stack
+  - Untuk n=12: 7 frame di stack
+  - Untuk n=1000: ~501 frame di stack
+  - Proporsional dengan n → O(N)
 
-# Cari harga median
-harga_median = median_iterative(harga_kamera)
-print(f"Produk dengan harga median: Rp {harga_median:,.0f}")
-# Output: Produk dengan harga median: Rp 6,000,000
-
-# Tampilkan produk dengan harga mendekati median
-produk_median = [p for p in products if abs(p.harga - harga_median) <= 500000]
-```
-
----
-
-## 📊 Mengapa Menggunakan Median?
-
-### Kelebihan Median dibanding Rata-rata:
-
-1. **Tidak dipengaruhi outlier:**
-   - Jika ada 1 produk super mahal, rata-rata akan tinggi
-   - Median tetap stabil
-
-2. **Lebih representatif:**
-   - Menunjukkan "nilai tengah" yang sebenarnya
-   - Lebih sesuai untuk data yang tidak normal
-
-3. **Mudah dipahami:**
-   - Customer lebih mudah memahami "harga tengah-tengah"
-   - Tidak perlu penjelasan statistik rumit
+- **Operasi Dasar:**
+  - Perbandingan `current_index == target_idx`: 7 kali
+  - Penjumlahan `current_index + 1`: 6 kali
+  - Akses array: 1 kali (call terakhir)
+  - Total operasi: ~20-25 operasi untuk n=12 (termasuk overhead rekursi)
 
 ---
 
-## 💻 Contoh Implementasi dalam Sistem
+## 🔄 Perbandingan Kedua Algoritma
+
+### **Untuk Data Laptop Gaming (n=12):**
+
+| Aspek | Iteratif | Rekursif |
+|-------|----------|----------|
+| **Hasil** | 22.5 juta | 22.5 juta ✓ (sama) |
+| **Jumlah Iterasi/Panggilan** | 7 iterasi | 7 panggilan |
+| **Kompleksitas Waktu** | O(N) | O(N) |
+| **Kompleksitas Ruang** | O(1) | O(N) |
+| **Operasi Dasar** | ~15 operasi | ~25 operasi |
+| **Stack Frames** | 1 (tidak ada rekursi) | 7 frames |
+| **Overhead** | Minimal | Overhead pemanggilan fungsi |
+
+### **Perbandingan untuk Data Lebih Besar:**
+
+**Contoh: 1000 produk laptop (n=1000)**
+
+| Aspek | Iteratif | Rekursif |
+|-------|----------|----------|
+| **Iterasi/Panggilan** | 501 | 501 |
+| **Kompleksitas Waktu** | O(N) | O(N) |
+| **Kompleksitas Ruang** | O(1) - konstan | O(N) - 501 frame stack |
+| **Risiko** | Tidak ada | Stack overflow mungkin terjadi |
+| **Efisiensi** | Lebih efisien | Lebih lambat karena overhead |
+
+---
+
+## 💡 Mengapa Memilih Algoritma Iteratif?
+
+### **Keuntungan Algoritma Iteratif untuk Sistem E-Commerce:**
+
+1. **Hemat Memori:**
+   - Kompleksitas ruang O(1) vs O(N) untuk rekursif
+   - Penting untuk sistem yang menangani ribuan produk
+   - Tidak membebani server dengan stack frames
+
+2. **Lebih Cepat:**
+   - Tidak ada overhead pemanggilan fungsi rekursif
+   - Operasi lebih sedikit untuk hasil yang sama
+   - Penting untuk real-time display di website
+
+3. **Lebih Stabil:**
+   - Tidak ada risiko stack overflow
+   - Bisa menangani data sangat besar (puluhan ribu produk)
+   - Sistem lebih reliable
+
+4. **Lebih Mudah Di-debug:**
+   - Kode lebih sederhana dan linear
+   - Lebih mudah dirawat oleh tim development
+   - Tidak ada kompleksitas rekursi yang sulit ditelusuri
+
+### **Kapan Rekursif Bisa Digunakan?**
+
+- Hanya jika data sangat kecil (n < 50)
+- Untuk tujuan pembelajaran
+- Jika ada constraint khusus yang mengharuskan rekursif
+
+---
+
+## 💻 Implementasi dalam Sistem E-Commerce
+
+### **Contoh Kode dalam Sistem:**
 
 ```python
 class ProductCatalog:
@@ -175,66 +336,111 @@ class ProductCatalog:
         self.products = []
     
     def add_product(self, name, price):
+        """Menambahkan produk dan mengurutkan berdasarkan harga"""
         self.products.append({'name': name, 'price': price})
-        # Urutkan berdasarkan harga
+        # Urutkan berdasarkan harga (ascending)
         self.products.sort(key=lambda x: x['price'])
     
-    def get_median_price(self):
-        """Mengembalikan harga median dari semua produk"""
+    def get_median_price_iterative(self):
+        """Menggunakan algoritma iteratif - RECOMMENDED"""
         prices = [p['price'] for p in self.products]
         return median_iterative(prices)
     
-    def get_products_near_median(self, tolerance=100000):
-        """Mengembalikan produk dengan harga mendekati median"""
-        median_price = self.get_median_price()
-        return [
-            p for p in self.products 
-            if abs(p['price'] - median_price) <= tolerance
-        ]
+    def get_median_price_recursive(self):
+        """Menggunakan algoritma rekursif - NOT RECOMMENDED untuk data besar"""
+        prices = [p['price'] for p in self.products]
+        return median_recursive(prices)
+    
+    def display_category_info(self):
+        """Menampilkan informasi kategori dengan harga median"""
+        median_price = self.get_median_price_iterative()
+        print(f"Kategori: Laptop Gaming")
+        print(f"Jumlah produk: {len(self.products)}")
+        print(f"Harga median: Rp {median_price:,.0f}")
+        print(f"Rentang harga: Rp {self.products[0]['price']:,.0f} - Rp {self.products[-1]['price']:,.0f}")
 
-# Penggunaan
+# Penggunaan dalam sistem
 catalog = ProductCatalog()
+
+# Data produk laptop gaming (sudah terurut berdasarkan harga)
 catalog.add_product("Laptop A", 8000000)
-catalog.add_product("Laptop B", 12000000)
-catalog.add_product("Laptop C", 10000000)
+catalog.add_product("Laptop B", 10000000)
+catalog.add_product("Laptop C", 12000000)
 catalog.add_product("Laptop D", 15000000)
-catalog.add_product("Laptop E", 9000000)
+catalog.add_product("Laptop E", 18000000)
+catalog.add_product("Laptop F", 20000000)
+catalog.add_product("Laptop G", 25000000)
+catalog.add_product("Laptop H", 30000000)
+catalog.add_product("Laptop I", 35000000)
+catalog.add_product("Laptop J", 40000000)
+catalog.add_product("Laptop K", 50000000)
+catalog.add_product("Laptop L", 70000000)
 
-print(f"Harga median: Rp {catalog.get_median_price():,.0f}")
-# Output: Harga median: Rp 10,000,000
+# Tampilkan informasi kategori
+catalog.display_category_info()
 
-print("Produk dengan harga mendekati median:")
-for product in catalog.get_products_near_median():
-    print(f"- {product['name']}: Rp {product['price']:,.0f}")
+# Output:
+# Kategori: Laptop Gaming
+# Jumlah produk: 12
+# Harga median: Rp 22,500,000
+# Rentang harga: Rp 8,000,000 - Rp 70,000,000
 ```
+
+---
+
+## 📊 Visualisasi Perbandingan
+
+### **Grafik Waktu Eksekusi:**
+
+```
+Waktu Eksekusi vs Ukuran Data:
+
+Iteratif (O(N)):     ████░░░░░░░░ (cepat, stabil)
+Rekursif (O(N)):     ████████░░░░ (lambat, overhead)
+```
+
+### **Grafik Penggunaan Memori:**
+
+```
+Penggunaan Memori vs Ukuran Data:
+
+Iteratif (O(1)):     █░░░░░░░░░░░ (konstan)
+Rekursif (O(N)):     ████████████ (meningkat linear)
+```
+
+---
+
+## 🎯 Kesimpulan untuk Kasus E-Commerce
+
+### **Rekomendasi:**
+
+✅ **Gunakan Algoritma Iteratif** karena:
+
+1. **Efisiensi:** O(1) ruang vs O(N) untuk rekursif
+2. **Kecepatan:** Lebih cepat, tidak ada overhead rekursi
+3. **Skalabilitas:** Bisa menangani data besar tanpa masalah
+4. **Reliability:** Tidak ada risiko stack overflow
+5. **Maintainability:** Kode lebih sederhana dan mudah dirawat
+
+### **Alasan Pemilihan untuk Sistem E-Commerce:**
+
+- Sistem e-commerce menangani ribuan hingga puluhan ribu produk
+- Perhitungan median perlu cepat untuk real-time display
+- Server perlu efisien dalam penggunaan memori
+- Sistem harus reliable dan tidak crash karena stack overflow
+- Tim development perlu kode yang mudah dipahami dan dirawat
+
+**Kesimpulan Akhir:** Untuk aplikasi e-commerce yang menangani data besar, algoritma iteratif adalah pilihan yang jelas lebih unggul daripada rekursif.
 
 ---
 
 ## 🎤 Cara Menjelaskan dalam Presentasi
 
-**"Pak/Bu, algoritma mencari median ini sangat berguna dalam berbagai aplikasi praktis, misalnya:"**
+**"Pak/Bu, kami mengambil contoh kasus sistem e-commerce yang menampilkan harga median produk. Ini adalah aplikasi nyata yang sering digunakan di platform seperti Tokopedia atau Shopee."**
 
-1. **Sistem e-commerce:** Menampilkan harga median produk untuk membantu customer menentukan budget
-2. **Analisis penjualan:** Menentukan median penjualan untuk perencanaan bisnis
-3. **Sistem rating:** Menampilkan rating median yang lebih representatif
-4. **Rekomendasi harga:** Membantu seller menentukan harga jual optimal
+**"Dalam contoh kami, kami memiliki 12 produk laptop gaming dengan harga yang sudah terurut. Sistem perlu menampilkan harga median yaitu 22.5 juta rupiah kepada customer."**
 
-**"Kami memilih kasus mencari median pada array terurut karena:"**
-- Sering digunakan dalam aplikasi nyata
-- Perlu efisiensi karena data bisa sangat besar
-- Penting untuk memilih algoritma yang tepat (iteratif vs rekursif)
+**"Kami mengimplementasikan kedua algoritma - iteratif dan rekursif - dan keduanya memberikan hasil yang sama yaitu 22.5 juta. Namun, dari analisis kompleksitas, algoritma iteratif lebih unggul karena menggunakan ruang O(1) dibanding O(N) untuk rekursif, dan tidak ada risiko stack overflow untuk data besar seperti dalam sistem e-commerce yang menangani ribuan produk."**
 
-**"Dari analisis kami, algoritma iteratif lebih efisien untuk kasus ini karena kompleksitas ruang O(1) dan tidak ada risiko stack overflow untuk data besar seperti dalam sistem e-commerce."**
-
----
-
-## 📝 Kesimpulan
-
-Algoritma mencari median sangat relevan untuk:
-- ✅ Sistem e-commerce dan marketplace
-- ✅ Analisis data bisnis
-- ✅ Sistem rekomendasi
-- ✅ Aplikasi yang membutuhkan nilai tengah representatif
-
-Dengan menggunakan algoritma yang efisien (iteratif), sistem dapat memproses data dalam jumlah besar dengan cepat dan hemat memori.
+**"Oleh karena itu, untuk aplikasi nyata seperti ini, kami merekomendasikan penggunaan algoritma iteratif."**
 
