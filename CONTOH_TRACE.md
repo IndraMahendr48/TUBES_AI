@@ -16,21 +16,35 @@ n = len(arr) = 5
 | 2 | `if n == 0:` | `False` | 1 perbandingan | Skip |
 | 3 | `if n == 1:` | `False` | 1 perbandingan | Skip |
 | 4 | `middle_index = n // 2` | `middle_index = 2` | 1 pembagian | 5 // 2 = 2 |
-| 5 | **LOOP: `for i in range(middle_index + 1)`** | **`range(3)` → i = 0, 1, 2** | **3 iterasi** | **Loop dari 0 sampai 2** |
-| 5a | **Iterasi 1: i=0** | **`current_val = arr[0] = 10`** | **1 perbandingan, 1 akses** | **Check loop, akses array** |
-| 5b | **Iterasi 2: i=1** | **`current_val = arr[1] = 20`** | **1 perbandingan, 1 increment, 1 akses** | **Check loop, increment i, akses array** |
-| 5c | **Iterasi 3: i=2** | **`current_val = arr[2] = 30`** | **1 perbandingan, 1 increment, 1 akses** | **Check loop, increment i, akses array** |
+| 5 | **LOOP: `for i in range(middle_index + 1)`** | **`range(3)` → i = 0, 1, 2** | **3 iterasi** | **⚡ OPERASI DOMINAN: Loop ini dieksekusi paling sering!** |
+| 5a | **Iterasi 1: i=0** | **`current_val = arr[0] = 10`** | **1 akses array** | **⚡ Operasi dominan dalam loop: akses arr[i]** |
+| 5b | **Iterasi 2: i=1** | **`current_val = arr[1] = 20`** | **1 akses array** | **⚡ Operasi dominan dalam loop: akses arr[i]** |
+| 5c | **Iterasi 3: i=2** | **`current_val = arr[2] = 30`** | **1 akses array** | **⚡ Operasi dominan dalam loop: akses arr[i]** |
+
+**📌 Catatan Penting:**
+- **Operasi yang PALING SERING dikunjungi**: `arr[i]` dalam loop (3 kali)
+- **Operasi dominan**: Akses array dalam loop = **n//2 + 1 kali**
+- Operasi lain (perbandingan loop condition, increment i) juga penting, tapi akses array adalah operasi dominan
 | 6 | `if n % 2 == 0:` | `False` (5 % 2 = 1) | 1 modulo | Ganjil, masuk else |
 | 7 | `return float(current_val)` | `float(30) = 30.0` | 1 konversi | Return 30.0 |
 
 **Result:** `30.0`
 
 **Total Operasi:** 
-- Operasi di luar loop: 6
-- Operasi dalam loop: 3 iterasi × 3 ops = 9
+- Operasi di luar loop: ~6 (perbandingan, pembagian, modulo - hanya sekali)
+- **Operasi DOMINAN dalam loop**: Akses array `arr[i]` = **3 kali** (paling sering!)
+- Operasi pendukung loop: perbandingan condition, increment (juga 3 kali)
 - **Total: ~15 operasi dasar**
 
 **Jumlah Iterasi Loop:** 3 = (n//2 + 1) = (5//2 + 1)
+
+**⚡ KESIMPULAN:**
+Operasi **`arr[i]`** adalah operasi yang PALING SERING dikunjungi (dominant operation) karena:
+- Dieksekusi di setiap iterasi loop
+- Untuk n=5: dieksekusi 3 kali
+- Untuk n=100: dieksekusi 51 kali
+- Untuk n=1000: dieksekusi 501 kali
+- **Proporsional dengan n → O(N)**
 
 ---
 
@@ -48,11 +62,15 @@ n = len(arr) = 6
 | 2 | `if n == 0:` | `False` | 1 perbandingan | Skip |
 | 3 | `if n == 1:` | `False` | 1 perbandingan | Skip |
 | 4 | `middle_index = n // 2` | `middle_index = 3` | 1 pembagian | 6 // 2 = 3 |
-| 5 | **LOOP: `for i in range(middle_index + 1)`** | **`range(4)` → i = 0, 1, 2, 3** | **4 iterasi** | **Loop dari 0 sampai 3** |
-| 5a | **Iterasi 1: i=0** | **`current_val = arr[0] = 10`** | **1 perbandingan, 1 akses** | **Check loop, akses array** |
-| 5b | **Iterasi 2: i=1** | **`current_val = arr[1] = 20`** | **1 perbandingan, 1 increment, 1 akses** | **Check loop, increment i, akses array** |
-| 5c | **Iterasi 3: i=2** | **`current_val = arr[2] = 30`** | **1 perbandingan, 1 increment, 1 akses** | **Check loop, increment i, akses array** |
-| 5d | **Iterasi 4: i=3** | **`current_val = arr[3] = 40`** | **1 perbandingan, 1 increment, 1 akses** | **Check loop, increment i, akses array** |
+| 5 | **LOOP: `for i in range(middle_index + 1)`** | **`range(4)` → i = 0, 1, 2, 3** | **4 iterasi** | **⚡ OPERASI DOMINAN: Loop ini dieksekusi paling sering!** |
+| 5a | **Iterasi 1: i=0** | **`current_val = arr[0] = 10`** | **1 akses array** | **⚡ Operasi dominan: akses arr[0]** |
+| 5b | **Iterasi 2: i=1** | **`current_val = arr[1] = 20`** | **1 akses array** | **⚡ Operasi dominan: akses arr[1]** |
+| 5c | **Iterasi 3: i=2** | **`current_val = arr[2] = 30`** | **1 akses array** | **⚡ Operasi dominan: akses arr[2]** |
+| 5d | **Iterasi 4: i=3** | **`current_val = arr[3] = 40`** | **1 akses array** | **⚡ Operasi dominan: akses arr[3]** |
+
+**📌 Catatan Penting:**
+- **Operasi yang PALING SERING dikunjungi**: `arr[i]` dalam loop (4 kali untuk n=6)
+- **Operasi dominan**: Akses array dalam loop = **n//2 + 1 kali**
 | 6 | `if n % 2 == 0:` | `True` (6 % 2 = 0) | 1 modulo | Genap, masuk if |
 | 7 | `val1 = arr[middle_index - 1]` | `arr[2] = 30` | 1 pengurangan, 1 akses | 3 - 1 = 2 |
 | 8 | `val2 = current_val` | `40` | 1 assignment | Menggunakan nilai dari loop |
@@ -61,11 +79,15 @@ n = len(arr) = 6
 **Result:** `35.0`
 
 **Total Operasi:**
-- Operasi di luar loop: 7
-- Operasi dalam loop: 4 iterasi × 3 ops = 12
+- Operasi di luar loop: ~7 (hanya sekali dieksekusi)
+- **Operasi DOMINAN dalam loop**: Akses array `arr[i]` = **4 kali** (paling sering!)
+- Operasi pendukung loop: perbandingan, increment (juga 4 kali)
 - **Total: ~19 operasi dasar**
 
 **Jumlah Iterasi Loop:** 4 = (n//2 + 1) = (6//2 + 1)
+
+**⚡ KESIMPULAN:**
+Operasi **`arr[i]`** adalah operasi dominan yang dieksekusi **4 kali** (untuk n=6), yang merupakan operasi paling sering dikunjungi dalam algoritma ini.
 
 ---
 
@@ -237,16 +259,20 @@ if n % 2 == 0:  # 6 % 2 = 0 (genap) ✓
 
 ### Untuk Algoritma Iteratif:
 - ✅ **Ada loop!** Loop dari 0 sampai middle_index
-- ✅ **Operasi linear:** Bergantung pada n, loop berjalan (n//2 + 1) kali
+- ✅ **Operasi DOMINAN:** Akses array `arr[i]` dalam loop - ini yang PALING SERING dikunjungi
+- ✅ **Operasi linear:** Operasi dominan dieksekusi (n//2 + 1) kali, bergantung pada n
 - ✅ **Setiap iterasi:** Akses arr[i] untuk mendapatkan nilai sampai middle_index
 - ✅ **O(N) waktu, O(1) ruang**
 - ✅ **Bisa dihitung:** T(n) = Σ(i=0 to n//2) 1 = (n//2) + 1 = O(n)
+- ✅ **Fokus pada operasi dominan:** Operasi yang dalam loop adalah yang paling menentukan kompleksitas
 
 ### Untuk Algoritma Rekursif:
-- ⚠️ **Ada rekursi:** Memanggil diri sendiri n/2 kali
-- ⚠️ **Operasi linear:** Proporsional dengan n
+- ⚠️ **Ada rekursi:** Memanggil diri sendiri (n//2 + 1) kali
+- ⚠️ **Operasi DOMINAN:** Perbandingan `current_index == target_idx` - ini yang PALING SERING dikunjungi
+- ⚠️ **Operasi linear:** Operasi dominan dieksekusi (n//2 + 1) kali, proporsional dengan n
 - ⚠️ **Stack frame:** Setiap call memakan memori
 - ⚠️ **O(N) waktu dan ruang**
+- ⚠️ **Fokus pada operasi dominan:** Operasi yang dalam rekursi adalah yang paling menentukan kompleksitas
 
 ---
 
@@ -277,4 +303,5 @@ if n % 2 == 0:  # 6 % 2 = 0 (genap) ✓
 ---
 
 **Gunakan trace ini untuk presentasi! 🎤**
+
 
