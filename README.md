@@ -1,791 +1,385 @@
-# 📚 Panduan Presentasi - Analisis Kompleksitas Algoritma
-## Pencarian Median pada Array Terurut
+# LAPORAN TUGAS BESAR
+## Simulasi Penggunaan Ruang Parkir di Area Kampus
 
-**Kelompok:**
-- Indra (Presenter & Demo)
-- Tubagus (Penjelasan Algoritma)
-- Vandin (Analisis Kompleksitas & Hasil)
+**Mata Kuliah:** Pemodelan, Simulasi, dan Optimasi  
+**Topik:** Simulasi Penggunaan Ruang Parkir di Area Kampus
 
 ---
 
-## 📋 Daftar Isi
+## 1. Pendahuluan
 
-1. [Struktur Program & Nama Fungsi](#struktur-program--nama-fungsi)
-2. [Penjelasan Algoritma Iteratif (Detail)](#penjelasan-algoritma-iteratif-detail)
-3. [Penjelasan Algoritma Rekursif (Detail)](#penjelasan-algoritma-rekursif-detail)
-4. [Analisis Operasi Dasar & Hitungan](#analisis-operasi-dasar--hitungan)
-5. [Jawaban untuk Pertanyaan Dosen](#jawaban-untuk-pertanyaan-dosen)
-6. [Script Presentasi](#script-presentasi)
+### 1.1 Latar Belakang
 
----
+Keterbatasan lahan parkir di area kampus sering menimbulkan masalah waktu dan kemacetan internal. Fenomena ini terjadi karena ketidakseimbangan antara jumlah kendaraan yang masuk dengan kapasitas slot parkir yang tersedia. Untuk memahami dan menganalisis dinamika sistem parkir kampus, diperlukan model simulasi yang dapat memodelkan interaksi antara kendaraan (agen) dengan lingkungan parkir.
 
-## 🏗️ Struktur Program & Nama Fungsi
+### 1.2 Tujuan
 
-### Class: `MedianAnalyzer`
+Tujuan dari penelitian ini adalah:
+1. Menganalisis dinamika pencarian parkir di area kampus
+2. Menganalisis distribusi penggunaan lahan parkir
+3. Mengevaluasi pengaruh berbagai parameter terhadap performa sistem parkir
+4. Memberikan rekomendasi untuk optimasi penggunaan ruang parkir
 
-Program ini menggunakan satu class utama yaitu `MedianAnalyzer` yang berisi:
+### 1.3 Ruang Lingkup
 
-#### 1. `__init__(self)`
-- **Fungsi**: Inisialisasi object, membuat dictionary untuk menyimpan hasil
-- **Parameter**: `self`
-- **Return**: Tidak ada (constructor)
-- **Isi**: Membuat dictionary `results` dengan keys: sizes, iterative_times, recursive_times, iterative_results, recursive_results
-
-#### 2. `generate_sorted_array(self, n)`
-- **Fungsi**: Generate array terurut untuk pengujian
-- **Parameter**: 
-  - `n` (int): Ukuran array yang ingin dibuat
-- **Return**: `arr` (list): Array terurut berisi angka random 1-10000
-- **Penjelasan**: 
-  - Generate n buah angka random antara 1-10000
-  - Array diurutkan menggunakan `sorted()`
-  - Contoh: n=5 → [123, 456, 789, 1234, 5678]
-
-#### 3. `median_iterative(self, arr)`
-- **Fungsi**: Menghitung median dengan pendekatan iteratif menggunakan loop
-- **Parameter**: 
-  - `arr` (list): Array terurut
-- **Return**: `float` atau `None`: Nilai median
-- **Kompleksitas**: O(N) waktu, O(1) ruang
-- **Ini adalah ALGORITMA ITERATIF yang akan dijelaskan detail**
-
-#### 4. `median_recursive(self, arr)`
-- **Fungsi**: Menghitung median dengan pendekatan rekursif
-- **Parameter**: 
-  - `arr` (list): Array terurut
-- **Return**: `float` atau `None`: Nilai median
-- **Kompleksitas**: O(N) waktu, O(N) ruang
-- **Mengandung helper function**: `find_element(current_index, target_idx)`
-- **Ini adalah ALGORITMA REKURSIF yang akan dijelaskan detail**
-
-#### 5. `run_benchmark(self, sizes, iterations)`
-- **Fungsi**: Menjalankan pengujian benchmark untuk berbagai ukuran input
-- **Parameter**: 
-  - `sizes` (list): List ukuran input yang akan diuji
-  - `iterations` (int): Jumlah iterasi per ukuran (default: 10)
-- **Return**: Tidak ada (menyimpan hasil ke `self.results`)
-- **Penjelasan**: 
-  - Untuk setiap ukuran n, generate array dan test kedua algoritma
-  - Setiap test diulang beberapa kali untuk akurasi
-  - Simpan rata-rata waktu eksekusi
-
-#### 6. `plot_graph(self, save_path)`
-- **Fungsi**: Membuat grafik perbandingan waktu eksekusi
-- **Parameter**: 
-  - `save_path` (str): Path untuk menyimpan file grafik
-- **Return**: Tidak ada (menyimpan file PNG)
-
-#### 7. `export_results_to_file(self, filename)`
-- **Fungsi**: Mengekspor hasil ke file teks
-- **Parameter**: 
-  - `filename` (str): Nama file output
-- **Return**: Tidak ada (menulis file)
+Simulasi ini menggunakan pendekatan agent-based modeling dimana:
+- **Agen** merepresentasikan kendaraan yang masuk, mencari parkir, parkir, dan keluar
+- **Patch** merepresentasikan slot parkir dan jalan pada grid 2D
+- Sistem mensimulasikan pergerakan kendaraan dalam mencari slot parkir terdekat
+- Setiap kendaraan memiliki durasi parkir tertentu sebelum keluar
 
 ---
 
-## 🔵 Penjelasan Algoritma Iteratif (Detail)
+## 2. Desain Model dan Asumsi
 
-### Kode Lengkap:
+### 2.1 Arsitektur Model
+
+Model menggunakan pendekatan **Agent-Based Modeling (ABM)** dengan komponen utama:
+
+#### 2.1.1 Grid Environment
+- Grid 2D berukuran 33x33 cells
+- Setiap cell dapat berupa:
+  - **Grass** (area hijau/rumput): area yang tidak dapat dilalui
+  - **Road** (jalan): area yang dapat dilalui kendaraan
+  - **Parking** (slot parkir kosong): slot parkir yang tersedia
+  - **Occupied** (slot parkir terisi): slot parkir yang sedang digunakan
+
+#### 2.1.2 Agent (Kendaraan)
+Setiap kendaraan memiliki atribut:
+- **Posisi (x, y)**: koordinat pada grid
+- **Status**: `SEARCHING`, `PARKED`, atau `LEAVING`
+- **search_timer**: waktu yang dihabiskan untuk mencari parkir
+- **park_timer**: waktu yang sudah dihabiskan di tempat parkir
+- **target_duration**: durasi parkir yang ditentukan secara random
+
+#### 2.1.3 Layout Parkir
+- **Jalan melingkar**: mengelilingi area parkir (ring road)
+- **Jalan masuk**: di bagian bawah grid (entrance)
+- **Area parkir utama**: di tengah grid dengan pola setiap 3 kolom
+- **Area parkir tambahan** (opsional): di sisi kanan grid
+
+### 2.2 Asumsi Model
+
+1. **Pergerakan Kendaraan**:
+   - Kendaraan bergerak dalam 4 arah (atas, bawah, kiri, kanan)
+   - Kendaraan mencari slot parkir kosong di sekitar posisinya
+   - Jika tidak ada slot kosong, kendaraan bergerak secara random mencari parkir
+
+2. **Masuk Kendaraan**:
+   - Probabilitas masuk kendaraan baru setiap tick ditentukan oleh parameter `influx_rate` (0-100%)
+   - Kendaraan baru masuk dari jalan masuk di bagian bawah grid
+
+3. **Durasi Parkir**:
+   - Durasi parkir setiap kendaraan bersifat random
+   - Durasi = `base_parking_time` + random(0, `parking_duration_var`)
+   - Setelah durasi habis, kendaraan langsung keluar
+
+4. **Pencarian Parkir**:
+   - Kendaraan mencari slot parkir kosong di tetangga terdekat (4 arah)
+   - Jika ditemukan, kendaraan langsung parkir di slot tersebut
+   - Waktu pencarian dihitung dari masuk hingga menemukan slot parkir
+
+5. **Keluar Kendaraan**:
+   - Setelah durasi parkir habis, kendaraan mencari jalan terdekat
+   - Kendaraan keluar melalui jalan masuk di bagian bawah grid
+   - Slot parkir dibebaskan saat kendaraan mulai keluar
+
+### 2.3 Parameter Model
+
+| Parameter | Deskripsi | Nilai Default | Range |
+|-----------|-----------|---------------|-------|
+| `grid_size` | Ukuran grid | 33 | - |
+| `influx_rate` | Probabilitas masuk kendaraan baru (%) | 63 | 0-100 |
+| `parking_duration_var` | Variasi durasi parkir | 410 | 0-1000 |
+| `base_parking_time` | Durasi parkir minimum | 185 | 10-500 |
+| `add_extra_parking` | Tambah area parkir ekstra | False | True/False |
+
+---
+
+## 3. Implementasi Model
+
+### 3.1 Teknologi yang Digunakan
+
+- **Python 3.x**: Bahasa pemrograman utama
+- **NumPy**: Untuk manipulasi array dan grid
+- **Matplotlib**: Untuk visualisasi dan plotting
+- **Random**: Untuk simulasi probabilistik
+
+### 3.2 Struktur Kode
+
+#### 3.2.1 Class `CellType` (Enum)
+Mendefinisikan tipe-tipe cell pada grid:
 ```python
-def median_iterative(self, arr):
-    n = len(arr)                    # Operasi 1: Hitung panjang array
-    
-    # Base case: array kosong
-    if n == 0:                      # Operasi 2: Perbandingan
-        return None
-    
-    # Base case: array dengan 1 elemen
-    if n == 1:                      # Operasi 3: Perbandingan
-        return arr[0]               # Operasi 4: Akses array
-    
-    # Iteratif: menggunakan loop untuk iterate sampai ke elemen tengah
-    middle_index = n // 2           # Operasi 5: Pembagian integer
-    
-    # Loop dari 0 sampai middle_index (inclusive)
-    current_val = None
-    for i in range(middle_index + 1):  # Loop: dari 0 sampai middle_index
-        current_val = arr[i]        # Operasi dalam loop: Akses array
-    
-    # Jika jumlah elemen genap, median adalah rata-rata dua elemen tengah
-    if n % 2 == 0:                  # Operasi: Modulo (mengecek ganjil/genap)
-        val1 = arr[middle_index - 1]  # Operasi: Pengurangan, akses array
-        val2 = current_val            # Operasi: Assignment
-        return (val1 + val2) / 2.0    # Operasi: Penjumlahan, pembagian
-    else:
-        # Jika ganjil, median adalah elemen tengah
-        return float(current_val)     # Operasi: Konversi
+class CellType(Enum):
+    GRASS = 0
+    ROAD = 1
+    PARKING = 2
+    OCCUPIED = 3
 ```
 
-### 🔍 Penjelasan Step-by-Step dengan Contoh:
-
-#### **Contoh 1: Array Ganjil (n = 5)**
-Array: `[10, 20, 30, 40, 50]` (indeks: 0, 1, 2, 3, 4)
-
-**Step 1:** `n = len(arr)`
-- `n = 5`
-- Operasi: 1 kali perhitungan panjang array
-
-**Step 2:** Check base case
-- `if n == 0:` → False, lanjut
-- `if n == 1:` → False, lanjut
-- Operasi: 2 kali perbandingan
-
-**Step 3:** Hitung indeks tengah
-- `middle_index = n // 2`
-- `middle_index = 5 // 2 = 2`
-- Operasi: 1 kali pembagian integer
-
-**Step 4:** Loop sampai middle_index
-- `for i in range(middle_index + 1):` → `for i in range(3):` → i = 0, 1, 2
-- **Iterasi 1:** i=0, `current_val = arr[0]` = 10
-- **Iterasi 2:** i=1, `current_val = arr[1]` = 20
-- **Iterasi 3:** i=2, `current_val = arr[2]` = 30
-- Operasi dalam loop: 3 kali akses array
-- Operasi loop: 3 kali perbandingan (check kondisi loop), 3 kali increment
-
-**Step 5:** Check ganjil/genap
-- `if n % 2 == 0:` → `if 5 % 2 == 0:` → False (ganjil)
-- Operasi: 1 kali modulo
-
-**Step 6:** Return elemen tengah
-- `return float(current_val)`
-- `return float(30)`
-- `return 30.0`
-- Operasi: 1 kali konversi float
-
-**Total Operasi:**
-- Perbandingan: 2 (base case) + 3 (loop condition) = 5
-- Aritmatika: 1 (pembagian), 1 (modulo), 3 (increment i)
-- Akses array: 3 (dalam loop)
-- Konversi: 1
-- **Total: ~13 operasi dasar**
-- **Jumlah iterasi loop: 3 = (n//2 + 1) = (5//2 + 1)**
-- **Kompleksitas: O(N) - linear, bergantung pada n**
-
----
-
-#### **Contoh 2: Array Genap (n = 6)**
-Array: `[10, 20, 30, 40, 50, 60]` (indeks: 0, 1, 2, 3, 4, 5)
-
-**Step 1:** `n = len(arr)`
-- `n = 6`
-- Operasi: 1
-
-**Step 2:** Check base case
-- `if n == 0:` → False
-- `if n == 1:` → False
-- Operasi: 2 perbandingan
-
-**Step 3:** Hitung indeks tengah
-- `middle_index = 6 // 2 = 3`
-- Operasi: 1 pembagian
-
-**Step 4:** Loop sampai middle_index
-- `for i in range(middle_index + 1):` → `for i in range(4):` → i = 0, 1, 2, 3
-- **Iterasi 1:** i=0, `current_val = arr[0]` = 10
-- **Iterasi 2:** i=1, `current_val = arr[1]` = 20
-- **Iterasi 3:** i=2, `current_val = arr[2]` = 30
-- **Iterasi 4:** i=3, `current_val = arr[3]` = 40
-- Operasi dalam loop: 4 kali akses array
-- Operasi loop: 4 kali perbandingan (check kondisi loop), 4 kali increment
-
-**Step 5:** Check ganjil/genap
-- `if n % 2 == 0:` → `if 6 % 2 == 0:` → True (genap)
-- Operasi: 1 modulo
-
-**Step 6:** Ambil dua elemen tengah dan rata-rata
-- `val1 = arr[middle_index - 1]` → `arr[2]` = 30
-- `val2 = current_val` → 40
-- Operasi: 1 pengurangan, 1 akses array, 1 assignment
-- `return (val1 + val2) / 2.0` → `(30 + 40) / 2.0` → `35.0`
-- Operasi: 1 penjumlahan, 1 pembagian
-
-**Total Operasi:**
-- Perbandingan: 2 (base case) + 4 (loop condition) = 6
-- Aritmatika: 1 pembagian, 1 modulo, 1 pengurangan, 1 penjumlahan, 1 pembagian, 4 increment
-- Akses array: 4 (dalam loop) + 1 (val1) = 5
-- Assignment: 1
-- **Total: ~17 operasi dasar**
-- **Jumlah iterasi loop: 4 = (n//2 + 1) = (6//2 + 1)**
-- **Kompleksitas: O(N) - linear, bergantung pada n**
-
----
-
-### 📊 Analisis Kompleksitas Iteratif:
-
-**Kompleksitas Waktu: O(N)**
-- **Best Case:** O(N) - loop berjalan (n//2 + 1) kali
-- **Average Case:** O(N) - loop berjalan (n//2 + 1) kali
-- **Worst Case:** O(N) - loop berjalan (n//2 + 1) kali
-- **Ada loop!** Loop berjalan dari 0 sampai middle_index
-- Jumlah operasi **BERGANTUNG** pada ukuran array n
-- Sum of operations: `T(n) = Σ(i=0 to n//2) 1 = n/2 + 1 = O(n)`
-
-**Kompleksitas Ruang: O(1)**
-- Hanya menggunakan variabel lokal: `n`, `middle_index`, `current_val`, `val1`, `val2`
-- Ruang yang digunakan konstan, tidak bergantung pada n
-- Tidak ada struktur data tambahan yang bergantung pada n
-
-**Mengapa O(N)?**
-- Ada loop `for i in range(middle_index + 1)`
-- Loop berjalan sebanyak (n//2 + 1) kali ≈ n/2 kali
-- Dalam setiap iterasi ada operasi akses array
-- Total operasi proporsional dengan n: O(n/2) = O(N)
-- Bisa dihitung dengan sum of operations
-
----
-
-## 🟠 Penjelasan Algoritma Rekursif (Detail)
-
-### Kode Lengkap:
+#### 3.2.2 Class `VehicleStatus` (Enum)
+Mendefinisikan status kendaraan:
 ```python
-def median_recursive(self, arr):
-    n = len(arr)                    # Operasi 1
-    
-    # Base case: array kosong
-    if n == 0:                      # Operasi 2
-        return None
-    
-    # Base case: array dengan 1 elemen
-    if n == 1:                      # Operasi 3
-        return float(arr[0])        # Operasi 4
-    
-    target_index = n // 2           # Operasi 5
-    
-    # Helper function rekursif
-    def find_element(current_index, target_idx):
-        # Base case: sudah mencapai indeks target
-        if current_index == target_idx:  # Operasi: perbandingan setiap rekursi
-            return arr[current_index]     # Operasi: akses array
-        # Recursive case: panggil diri sendiri dengan indeks berikutnya
-        return find_element(current_index + 1, target_idx)  # Rekursi!
-    
-    # Panggil fungsi rekursif
-    result = find_element(0, target_index)  # Mulai dari index 0
-    
-    # Jika jumlah elemen genap, hitung rata-rata dua elemen tengah
-    if n % 2 == 0:                  # Operasi
-        val1 = arr[target_index - 1]  # Operasi
-        val2 = result                 # Operasi
-        return (val1 + val2) / 2.0    # Operasi
-    else:
-        return float(result)          # Operasi
+class VehicleStatus(Enum):
+    SEARCHING = "searching"
+    PARKED = "parked"
+    LEAVING = "leaving"
 ```
 
-### 🔍 Penjelasan Step-by-Step dengan Contoh:
+#### 3.2.3 Class `Vehicle`
+Merepresentasikan kendaraan sebagai agen:
+- `update()`: Update status dan posisi kendaraan setiap tick
+- `_move_searching()`: Logika pergerakan saat mencari parkir
+- `_wait_parking()`: Logika menunggu di tempat parkir
+- `_move_leaving()`: Logika pergerakan saat keluar
 
-#### **Contoh 1: Array Ganjil (n = 5)**
-Array: `[10, 20, 30, 40, 50]` (indeks: 0, 1, 2, 3, 4)
-Target: `target_index = 5 // 2 = 2`
+#### 3.2.4 Class `ParkingSimulation`
+Kelas utama untuk simulasi:
+- `_setup_grid()`: Inisialisasi grid dengan jalan dan area parkir
+- `step()`: Satu langkah simulasi (generate kendaraan, update kendaraan, update metrics)
+- `_update_metrics()`: Update metrics seperti waktu pencarian, okupansi, dll
+- `get_grid_for_visualization()`: Prepare grid untuk visualisasi
 
-**Trace Rekursi `find_element(0, 2)`:**
-```
-Call 1: find_element(current_index=0, target_idx=2)
-  ├─ Check: 0 == 2? → False
-  └─ Rekursi: find_element(0 + 1, 2) = find_element(1, 2)
-  
-Call 2: find_element(current_index=1, target_idx=2)
-  ├─ Check: 1 == 2? → False
-  └─ Rekursi: find_element(1 + 1, 2) = find_element(2, 2)
-  
-Call 3: find_element(current_index=2, target_idx=2)
-  ├─ Check: 2 == 2? → True ✓ (BASE CASE)
-  └─ Return: arr[2] = 30
-```
+### 3.3 Alur Simulasi
 
-**Detail Operasi per Call:**
+1. **Inisialisasi**:
+   - Setup grid dengan jalan dan area parkir
+   - Inisialisasi metrics dan history
 
-**Call 1:**
-- Operasi: 1 perbandingan (`0 == 2`)
-- Operasi: 1 penjumlahan (`0 + 1`)
-- Operasi: 1 pemanggilan fungsi (overhead)
+2. **Loop Simulasi** (setiap tick):
+   - Generate kendaraan baru berdasarkan `influx_rate`
+   - Update semua kendaraan yang ada:
+     - Jika `SEARCHING`: cari slot parkir kosong di sekitar
+     - Jika `PARKED`: increment `park_timer`, jika sudah mencapai `target_duration` ubah ke `LEAVING`
+     - Jika `LEAVING`: bergerak ke jalan dan keluar
+   - Update metrics (waktu pencarian, okupansi, dll)
+   - Update history untuk plotting
 
-**Call 2:**
-- Operasi: 1 perbandingan (`1 == 2`)
-- Operasi: 1 penjumlahan (`1 + 1`)
-- Operasi: 1 pemanggilan fungsi (overhead)
+3. **Visualisasi**:
+   - Grid parkir dengan warna berbeda untuk setiap tipe cell
+   - Grafik jumlah kendaraan (total dan parkir)
+   - Grafik tingkat okupansi
+   - Grafik rata-rata waktu pencarian
 
-**Call 3:**
-- Operasi: 1 perbandingan (`2 == 2`)
-- Operasi: 1 akses array (`arr[2]`)
-- Return: 30
+### 3.4 Metrics yang Diukur
 
-**Total untuk find_element:**
-- Jumlah panggilan: 3 (untuk n=5, target_index=2)
-- Operasi per call: ~3 operasi
-- **Total operasi: 3 × 3 = 9 operasi**
-- **Stack frame: 3 frame** (memakan memori)
-
-**Kembali ke median_recursive:**
-- Check: `if n % 2 == 0` → False (ganjil)
-- Return: `float(30)` = 30.0
-
-**Total Operasi Rekursif:**
-- `len(arr)`: 1
-- Perbandingan base case: 2
-- `target_index`: 1
-- Rekursi find_element: 9 operasi
-- Perbandingan ganjil/genap: 1
-- Return: 1
-- **Total: ~15 operasi** (lebih banyak dari iteratif!)
+1. **Waktu Pencarian Parkir**: Rata-rata waktu yang dihabiskan kendaraan untuk mencari slot parkir
+2. **Tingkat Okupansi**: Persentase slot parkir yang terisi
+3. **Total Kendaraan**: Jumlah kendaraan aktif, parkir, dan selesai
+4. **Efisiensi**: Rasio kendaraan selesai terhadap waktu pencarian
 
 ---
 
-#### **Contoh 2: Array Genap (n = 6)**
-Array: `[10, 20, 30, 40, 50, 60]` (indeks: 0, 1, 2, 3, 4, 5)
-Target: `target_index = 6 // 2 = 3`
+## 4. Hasil Eksperimen dan Analisis
 
-**Trace Rekursi `find_element(0, 3)`:**
-```
-Call 1: find_element(0, 3)
-  ├─ 0 == 3? → False
-  └─ Rekursi: find_element(1, 3)
+### 4.1 Eksperimen 1: Pengaruh Jumlah Kendaraan (Influx Rate)
 
-Call 2: find_element(1, 3)
-  ├─ 1 == 3? → False
-  └─ Rekursi: find_element(2, 3)
+**Tujuan**: Menganalisis pengaruh jumlah kendaraan yang masuk terhadap performa sistem parkir.
 
-Call 3: find_element(2, 3)
-  ├─ 2 == 3? → False
-  └─ Rekursi: find_element(3, 3)
+**Parameter**:
+- `influx_rate`: 20%, 40%, 60%, 80%, 100%
+- `num_steps`: 1000 ticks
+- Parameter lain: default
 
-Call 4: find_element(3, 3)
-  ├─ 3 == 3? → True ✓ (BASE CASE)
-  └─ Return: arr[3] = 40
-```
+**Hasil dan Analisis**:
 
-**Total:**
-- Jumlah panggilan: 4 (untuk n=6, target_index=3)
-- Operasi rekursi: 4 × 3 = 12 operasi
-- **Stack frame: 4 frame**
+1. **Waktu Pencarian Parkir**:
+   - Semakin tinggi `influx_rate`, semakin tinggi waktu pencarian parkir
+   - Pada `influx_rate` rendah (20-40%), waktu pencarian relatif stabil
+   - Pada `influx_rate` tinggi (80-100%), terjadi peningkatan signifikan waktu pencarian karena kompetisi untuk slot parkir
 
-**Kembali ke median_recursive:**
-- Check: `if n % 2 == 0` → True (genap)
-- `val1 = arr[3 - 1]` = `arr[2]` = 30
-- `val2 = 40` (dari result)
-- Return: `(30 + 40) / 2.0` = 35.0
+2. **Tingkat Okupansi**:
+   - Okupansi meningkat seiring dengan peningkatan `influx_rate`
+   - Pada `influx_rate` tinggi, okupansi mendekati 100% (saturasi)
+   - Terjadi keseimbangan dinamis antara kendaraan masuk dan keluar
 
----
+3. **Total Kendaraan Selesai**:
+   - Jumlah kendaraan yang berhasil parkir dan keluar meningkat dengan `influx_rate`
+   - Namun, efisiensi (kendaraan selesai per waktu pencarian) menurun pada `influx_rate` tinggi
 
-### 📊 Analisis Kompleksitas Rekursif:
+**Kesimpulan Eksperimen 1**:
+- Sistem parkir memiliki kapasitas optimal pada `influx_rate` 60-70%
+- Di atas kapasitas optimal, terjadi penurunan efisiensi dan peningkatan waktu pencarian
+- Perlu manajemen masuk kendaraan untuk menghindari saturasi
 
-**Kompleksitas Waktu: O(N)**
+### 4.2 Eksperimen 2: Pengaruh Durasi Parkir
 
-**Mengapa O(N)?**
-- Fungsi `find_element` dipanggil sebanyak `target_index` kali
-- `target_index = n // 2`
-- Untuk n besar, `n // 2 ≈ n/2 ≈ O(n)`
-- Setiap panggilan melakukan operasi konstan O(1)
-- Total: O(n) × O(1) = **O(N)**
+**Tujuan**: Menganalisis pengaruh durasi parkir terhadap performa sistem.
 
-**Contoh hitungan:**
-- n = 10 → target_index = 5 → 5 panggilan
-- n = 100 → target_index = 50 → 50 panggilan
-- n = 1000 → target_index = 500 → 500 panggilan
-- **Proporsional dengan n!**
+**Parameter**:
+- `parking_duration_var`: 200, 300, 400, 500, 600
+- `influx_rate`: 63% (default)
+- `num_steps`: 1000 ticks
 
-**Kompleksitas Ruang: O(N)**
+**Hasil dan Analisis**:
 
-**Mengapa O(N)?**
-- Setiap panggilan rekursif menambahkan frame ke call stack
-- Jumlah frame = jumlah panggilan = target_index ≈ n/2
-- Setiap frame menyimpan:
-  - Parameter: `current_index`, `target_idx`
-  - Return address
-  - Local variables
-- Total ruang: O(n/2) = **O(N)**
+1. **Waktu Pencarian Parkir**:
+   - Durasi parkir yang lebih lama menyebabkan waktu pencarian meningkat
+   - Hal ini karena slot parkir lebih lama terisi, mengurangi ketersediaan slot kosong
 
-**Stack Overflow:**
-- Python default recursion limit: ~1000
-- Untuk n > 2000, bisa terjadi RecursionError
-- Oleh karena itu kita set `sys.setrecursionlimit(25000)`
+2. **Tingkat Okupansi**:
+   - Okupansi meningkat dengan durasi parkir yang lebih lama
+   - Durasi parkir yang lebih lama menyebabkan akumulasi kendaraan di area parkir
 
----
+3. **Total Kendaraan Selesai**:
+   - Durasi parkir yang lebih lama mengurangi jumlah kendaraan yang dapat dilayani
+   - Sistem menjadi kurang efisien dalam melayani kendaraan baru
 
-## 🔢 Analisis Operasi Dasar & Hitungan
+**Kesimpulan Eksperimen 2**:
+- Durasi parkir yang lebih lama mengurangi kapasitas sistem
+- Perlu kebijakan untuk membatasi durasi parkir atau meningkatkan kapasitas
+- Distribusi durasi parkir yang lebih pendek dapat meningkatkan throughput sistem
 
-### Operasi Dasar dalam Pemrograman:
+### 4.3 Eksperimen 3: Pengaruh Penambahan Area Parkir
 
-1. **Perbandingan** (`==`, `!=`, `<`, `>`, `<=`, `>=`)
-2. **Aritmatika** (`+`, `-`, `*`, `/`, `//`, `%`)
-3. **Akses Array** (`arr[index]`)
-4. **Assignment** (`=`)
-5. **Pemanggilan Fungsi** (overhead)
-6. **Return** (overhead)
+**Tujuan**: Menganalisis efektivitas penambahan area parkir tambahan.
 
-### Perbandingan Operasi Dasar:
+**Parameter**:
+- `add_extra_parking`: False vs True
+- `influx_rate`: 63% (default)
+- `num_steps`: 1000 ticks
 
-#### **Algoritma Iteratif (n = 100):**
+**Hasil dan Analisis**:
 
-| Operasi | Jumlah | Keterangan |
-|---------|--------|------------|
-| `len(arr)` | 1 | O(1) |
-| Perbandingan (`==`, `%`) | 3 + (n//2+1) | 2 base case + 1 ganjil/genap + loop condition |
-| Pembagian (`//`) | 1 | Hitung middle_index |
-| **Loop: for i in range(middle_index + 1)** | **(n//2 + 1) iterasi** | **n//2 + 1 = 51 kali** |
-| - Akses Array dalam loop | n//2 + 1 | 51 kali akses arr[i] |
-| - Increment i | n//2 + 1 | 51 kali increment |
-| Akses Array (val1 jika genap) | 0-1 | Tergantung ganjil/genap |
-| Aritmatika (`+`, `-`, `/`) | 0-2 | Tergantung ganjil/genap |
-| **Total** | **~55-60** | **BERGANTUNG pada n** |
+1. **Waktu Pencarian Parkir**:
+   - Penambahan area parkir mengurangi waktu pencarian parkir
+   - Ketersediaan slot parkir yang lebih banyak memudahkan kendaraan menemukan slot
 
-**Untuk n = 10:** ~7-8 operasi dalam loop = ~15 operasi total  
-**Untuk n = 100:** ~51 operasi dalam loop = ~60 operasi total  
-**Untuk n = 10000:** ~5001 operasi dalam loop = ~5010 operasi total  
-**Kesimpulan: O(N) - Linear!**
+2. **Tingkat Okupansi**:
+   - Dengan area parkir tambahan, okupansi lebih rendah karena lebih banyak slot tersedia
+   - Sistem lebih mampu menampung kendaraan tanpa mencapai saturasi
 
-**Sum of Operations:**
-```
-T(n) = Σ(i=0 to n//2) 1 = (n//2) + 1 = O(n)
-```
+3. **Total Kendaraan Selesai**:
+   - Penambahan area parkir meningkatkan jumlah kendaraan yang dapat dilayani
+   - Sistem menjadi lebih efisien dalam melayani kendaraan
 
----
+**Kesimpulan Eksperimen 3**:
+- Penambahan area parkir secara signifikan meningkatkan performa sistem
+- Investasi dalam penambahan area parkir dapat mengurangi waktu pencarian dan meningkatkan kapasitas
+- Perlu analisis cost-benefit untuk menentukan optimalitas penambahan area parkir
 
-#### **Algoritma Rekursif (n = 100):**
+### 4.4 Analisis Keseluruhan
 
-**Untuk n = 100:**
-- `target_index = 100 // 2 = 50`
-- Jumlah panggilan `find_element` = 50
+Berdasarkan ketiga eksperimen, dapat disimpulkan:
 
-| Operasi | Jumlah per Call | Total (50 calls) |
-|---------|-----------------|------------------|
-| Perbandingan (`==`) | 1 | 50 |
-| Penjumlahan (`+1`) | 1 | 50 |
-| Pemanggilan Fungsi | 1 | 50 (overhead) |
-| Akses Array | 0-1 | 1 (hanya call terakhir) |
-| **Total Operasi dalam Rekursi** | **~3** | **~150** |
+1. **Faktor Kritis**:
+   - Jumlah kendaraan yang masuk (`influx_rate`) adalah faktor paling kritis
+   - Durasi parkir mempengaruhi kapasitas sistem
+   - Kapasitas area parkir menentukan batas maksimal sistem
 
-**Plus operasi di median_recursive:**
-- `len(arr)`: 1
-- Perbandingan base case: 2
-- `target_index`: 1
-- Perbandingan ganjil/genap: 1
-- Return/konversi: 1-2
+2. **Optimasi Sistem**:
+   - Sistem optimal pada `influx_rate` 60-70% dengan durasi parkir sedang
+   - Penambahan area parkir efektif untuk meningkatkan kapasitas
+   - Perlu manajemen masuk kendaraan untuk menghindari saturasi
 
-**Total: ~156 operasi untuk n=100**
-
-**Untuk n = 10:** ~16 operasi  
-**Untuk n = 100:** ~156 operasi  
-**Untuk n = 1000:** ~1506 operasi  
-**Kesimpulan: O(N) - Linear!**
+3. **Rekomendasi**:
+   - Implementasi sistem reservasi atau pembatasan masuk pada jam sibuk
+   - Penambahan area parkir jika okupansi konsisten di atas 80%
+   - Kebijakan durasi parkir maksimal untuk meningkatkan turnover
 
 ---
 
-### Perbandingan Visual:
+## 5. Kesimpulan
 
-```
-n = 10:
-  Iteratif:  ~15 operasi  ███
-  Rekursif:  ~16 operasi  ███
+### 5.1 Ringkasan
 
-n = 100:
-  Iteratif:  ~60 operasi  ████████████████
-  Rekursif:  ~156 operasi █████████████████████████████████
+Simulasi agent-based untuk sistem parkir kampus berhasil memodelkan dinamika pencarian parkir dan distribusi penggunaan lahan parkir. Model ini dapat menganalisis pengaruh berbagai parameter terhadap performa sistem dan memberikan insight untuk optimasi.
 
-n = 1000:
-  Iteratif:  ~510 operasi ████████████████████████████████████████████████████
-  Rekursif:  ~1506 operasi ███████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+### 5.2 Temuan Utama
+
+1. **Jumlah Kendaraan**: Faktor paling kritis yang mempengaruhi waktu pencarian dan okupansi
+2. **Durasi Parkir**: Mempengaruhi kapasitas dan throughput sistem
+3. **Kapasitas Parkir**: Penambahan area parkir secara signifikan meningkatkan performa sistem
+
+### 5.3 Keterbatasan Model
+
+1. **Pergerakan Kendaraan**: Model menggunakan pergerakan random, tidak mempertimbangkan rute optimal
+2. **Interaksi Kendaraan**: Tidak memodelkan kemacetan atau antrian di jalan
+3. **Faktor Eksternal**: Tidak mempertimbangkan faktor cuaca, event khusus, dll
+4. **Distribusi Waktu**: Durasi parkir menggunakan distribusi uniform, tidak mempertimbangkan distribusi real-world
+
+### 5.4 Saran Pengembangan
+
+1. **Algoritma Pencarian**: Implementasi algoritma pencarian yang lebih cerdas (A*, Dijkstra)
+2. **Model Kemacetan**: Penambahan model kemacetan dan antrian di jalan
+3. **Distribusi Realistik**: Penggunaan distribusi durasi parkir yang lebih realistis (normal, exponential)
+4. **Multi-Entrance**: Penambahan multiple entrance/exit points
+5. **Sistem Reservasi**: Implementasi sistem reservasi parkir
+
+### 5.5 Kontribusi
+
+Model ini dapat digunakan untuk:
+- Analisis kapasitas parkir kampus
+- Perencanaan penambahan area parkir
+- Evaluasi kebijakan manajemen parkir
+- Optimasi layout parkir
+
+---
+
+## 6. Cara Menjalankan Program
+
+### 6.1 Instalasi Dependencies
+
+```bash
+pip install numpy matplotlib pillow
 ```
 
-**Kesimpulan:** Kedua algoritma memiliki kompleksitas waktu O(N), namun:
-- **Iteratif:** Operasi lebih sedikit karena tidak ada overhead rekursi
-- **Rekursif:** Operasi lebih banyak karena overhead pemanggilan fungsi
-
----
-
-## ❓ Jawaban untuk Pertanyaan Dosen
-
-### Pertanyaan 1: "Jelasin logika algoritma nya sama hitungannya"
-
-#### **Jawaban untuk Algoritma Iteratif:**
-
-**Logika:**
-"Baik Pak, algoritma iteratif bekerja dengan cara menggunakan loop untuk iterate dari index 0 sampai middle_index (n//2). Loop ini akan mengakses setiap elemen array dari awal sampai elemen tengah. Setelah loop selesai, kita sudah mendapatkan nilai di middle_index. Jika genap, kita ambil juga elemen sebelumnya dan rata-rata."
-
-**Hitungan (Contoh n=5):**
-1. Hitung panjang: `n = 5`
-2. Hitung indeks tengah: `middle_index = 5 // 2 = 2`
-3. Loop: `for i in range(3)` → i = 0, 1, 2
-   - Iterasi 1: i=0, akses arr[0]
-   - Iterasi 2: i=1, akses arr[1]
-   - Iterasi 3: i=2, akses arr[2]
-4. Karena ganjil, return arr[2] = 30
-5. **Total: ~13 operasi dasar (termasuk 3 operasi dalam loop), kompleksitas O(N)**
-
-**Hitungan (Contoh n=6):**
-1. `n = 6`, `middle_index = 6 // 2 = 3`
-2. Loop: `for i in range(4)` → i = 0, 1, 2, 3 (4 iterasi)
-   - Setiap iterasi: akses array
-3. Karena genap, ambil arr[2] dan arr[3] (dari current_val)
-4. Rata-rata: `(30 + 40) / 2 = 35`
-5. **Total: ~17 operasi dasar (termasuk 4 operasi dalam loop), tetap O(N)**
-
-**Sum of Operations:**
-`T(n) = Σ(i=0 to n//2) 1 = (n//2) + 1 = O(n)`
-
----
-
-#### **Jawaban untuk Algoritma Rekursif:**
-
-**Logika:**
-"Algoritma rekursif menggunakan fungsi helper `find_element` yang memanggil dirinya sendiri secara rekursif. Fungsi ini mulai dari index 0, kemudian setiap panggilan menaikkan index sampai mencapai target_index (yang adalah n//2). Ini seperti 'berjalan' melalui array secara rekursif sampai menemukan elemen tengah."
-
-**Hitungan (Contoh n=5, target_index=2):**
-1. `find_element(0, 2)`: Check 0==2? No → rekursi
-2. `find_element(1, 2)`: Check 1==2? No → rekursi  
-3. `find_element(2, 2)`: Check 2==2? Yes → return arr[2]=30
-4. **Total: 3 panggilan, ~9 operasi, kompleksitas O(N)**
-
-**Untuk n=100:**
-- target_index = 50
-- Jumlah panggilan = 50
-- **Total: ~150 operasi, proporsional dengan n**
-
----
-
-### Pertanyaan 2: "Ditanya kaya operasi dasar mana berapa dimana"
-
-#### **Jawaban Lengkap:**
-
-**Algoritma Iteratif - Operasi Dasar:**
-
-| No | Operasi | Lokasi | Jumlah | Contoh (n=5, middle_index=2) |
-|----|---------|--------|--------|------------------------------|
-| 1 | `len(arr)` | Line 51 | 1 | `n = len([10,20,30,40,50])` = 5 |
-| 2 | Perbandingan `==` | Line 54 | 1 | `if 5 == 0` → False |
-| 3 | Perbandingan `==` | Line 58 | 1 | `if 5 == 1` → False |
-| 4 | Pembagian `//` | Line 62 | 1 | `5 // 2 = 2` |
-| 5 | **Loop: for i in range(3)** | Line (loop) | **3 iterasi** | **i = 0, 1, 2** |
-| 5a | Perbandingan loop condition | Dalam loop | 3 | Check i < 3 |
-| 5b | Increment i | Dalam loop | 3 | i++ |
-| 5c | Akses Array `arr[i]` | Dalam loop | 3 | arr[0], arr[1], arr[2] |
-| 6 | Modulo `%` | Line 65 | 1 | `5 % 2 = 1` |
-| 7 | Konversi `float()` | Line 71 | 1 | `float(30) = 30.0` |
-
-**Total: 1 + 2 + 1 + (3×3) + 1 + 1 = ~15 operasi (untuk n=5)**
-**Untuk n=100: ~60 operasi, untuk n=1000: ~510 operasi**
-
-**Algoritma Rekursif - Operasi Dasar:**
-
-| No | Operasi | Lokasi | Jumlah | Contoh (n=5, target=2) |
-|----|---------|--------|--------|------------------------|
-| 1 | `len(arr)` | Line 90 | 1 | `n = 5` |
-| 2-3 | Perbandingan base case | Line 93, 97 | 2 | `if 5 == 0`, `if 5 == 1` |
-| 4 | Pembagian `//` | Line 100 | 1 | `5 // 2 = 2` |
-| 5-7 | **Rekursi Call 1** | Line 112 | 3 | `find_element(0, 2)`: perbandingan, penjumlahan, call |
-| 8-10 | **Rekursi Call 2** | Line 112 | 3 | `find_element(1, 2)`: perbandingan, penjumlahan, call |
-| 11-13 | **Rekursi Call 3** | Line 112 | 3 | `find_element(2, 2)`: perbandingan, akses array, return |
-| 14 | Perbandingan `%` | Line 118 | 1 | `if 5 % 2 == 0` |
-| 15 | Return | Line 123 | 1 | `return float(30)` |
-
-**Total: ~15 operasi untuk n=5, ~150 untuk n=100**
-
----
-
-### Pertanyaan 3: "i nya berapa" (Variabel current_index dalam rekursif)
-
-#### **Jawaban:**
-
-**Variabel `current_index` (biasanya disebut `i`):**
-
-"Pak, `current_index` adalah parameter yang menunjukkan posisi saat ini dalam array. Nilainya berubah setiap panggilan rekursif."
-
-**Trace untuk n=5 (target_index=2):**
-
-| Panggilan | current_index (i) | target_idx | Kondisi | Aksi |
-|-----------|-------------------|------------|---------|------|
-| Call 1 | `i = 0` | 2 | `0 != 2` | Rekursi dengan `i+1` |
-| Call 2 | `i = 1` | 2 | `1 != 2` | Rekursi dengan `i+1` |
-| Call 3 | `i = 2` | 2 | `2 == 2` ✓ | Return `arr[2]` |
-
-**Kode:**
-```python
-def find_element(current_index, target_idx):  # i = current_index
-    if current_index == target_idx:           # Check: i == target?
-        return arr[current_index]             # Return arr[i]
-    return find_element(current_index + 1, target_idx)  # Rekursi dengan i+1
+Atau menggunakan requirements.txt:
+```bash
+pip install -r requirements.txt
 ```
 
-**Jumlah nilai i:**
-- Untuk n=5: i berubah dari 0 → 1 → 2 (3 nilai)
-- Untuk n=10: i berubah dari 0 → 1 → ... → 5 (6 nilai)
-- Untuk n=100: i berubah dari 0 → 1 → ... → 50 (51 nilai)
-- **Rumus: i berubah sebanyak target_index + 1 kali = (n//2) + 1 kali**
+### 6.2 Menjalankan Simulasi
 
----
-
-### Pertanyaan 4: "Satu iteratif 2 rekursif"
-
-#### **Jawaban:**
-
-"Maksudnya Pak, untuk menjelaskan dua algoritma ini:"
-
-**Bagian 1: Algoritma Iteratif (1 penjelasan)**
-- Penjelasan logika algoritma iteratif dengan loop
-- Contoh step-by-step dengan trace loop
-- Analisis kompleksitas O(N) dengan sum of operations
-
-**Bagian 2: Algoritma Rekursif (2 penjelasan)**
-- **2.1:** Penjelasan logika algoritma rekursif secara umum
-- **2.2:** Penjelasan detail fungsi `find_element` dan trace rekursinya
-
-**Atau bisa berarti:**
-- **1 iteratif:** Satu cara pendekatan (menggunakan loop)
-- **2 rekursif:** Dua bagian dalam rekursif:
-  1. Fungsi utama `median_recursive`
-  2. Helper function `find_element` yang rekursif
-
----
-
-## 📝 Script Presentasi
-
-### **Pembukaan (Indra):**
-
-"Selamat pagi/siang Pak/Bu. Kami dari kelompok [nama], akan mempresentasikan tugas besar Analisis Kompleksitas Algoritma dengan judul 'Analisis Kompleksitas Algoritma Iteratif dan Rekursif dalam Mencari Nilai Median Pada Array Terurut'."
-
-"Kelompok kami terdiri dari:
-- Saya (Indra) akan melakukan demo program
-- Tubagus akan menjelaskan logika algoritma
-- Vandin akan menjelaskan analisis kompleksitas dan hasil pengujian"
-
----
-
-### **Penjelasan Struktur Program (Indra):**
-
-"Program kami menggunakan Python dengan class `MedianAnalyzer` yang memiliki beberapa fungsi utama:
-1. `generate_sorted_array` untuk generate data uji
-2. `median_iterative` untuk algoritma iteratif
-3. `median_recursive` untuk algoritma rekursif
-4. `run_benchmark` untuk menjalankan pengujian
-5. `plot_graph` untuk visualisasi hasil"
-
----
-
-### **Penjelasan Algoritma Iteratif (Tubagus):**
-
-"Baik Pak, saya akan jelaskan algoritma iteratif. Algoritma ini bekerja dengan cara menggunakan loop untuk iterate dari index 0 sampai middle_index. Loop ini akan mengakses setiap elemen array sampai mencapai elemen tengah."
-
-"Langkah-langkahnya:
-1. Hitung panjang array: `n = len(arr)`
-2. Hitung indeks tengah: `middle_index = n // 2`
-3. Loop dari i=0 sampai i=middle_index (inclusive)
-   - Di setiap iterasi, akses arr[i]
-4. Setelah loop, kita punya nilai di middle_index
-5. Jika ganjil, return nilai tersebut
-6. Jika genap, ambil juga elemen sebelumnya dan rata-rata"
-
-**Contoh:**
-"Misalnya array `[10, 20, 30, 40, 50]` dengan n=5:
-- middle_index = 5 // 2 = 2
-- Loop: for i in range(3) → i = 0, 1, 2
-  - Iterasi 1: i=0, akses arr[0]=10
-  - Iterasi 2: i=1, akses arr[1]=20
-  - Iterasi 3: i=2, akses arr[2]=30
-- Karena ganjil, return 30"
-
-"Operasi dasar yang dilakukan:
-- 1 kali len(arr)
-- 2 kali perbandingan base case
-- 1 kali pembagian (//)
-- Loop: (n//2 + 1) kali iterasi
-  - Setiap iterasi: 1 perbandingan, 1 increment, 1 akses array
-- Total: ~13 operasi untuk n=5, ~60 operasi untuk n=100
-- Kompleksitas: O(N) - linear, bergantung pada n
-- Sum of operations: T(n) = Σ(i=0 to n//2) 1 = (n//2) + 1 = O(n)"
-
----
-
-### **Penjelasan Algoritma Rekursif (Tubagus):**
-
-"Sekarang algoritma rekursif. Algoritma ini menggunakan fungsi helper `find_element` yang rekursif. Fungsi ini 'berjalan' melalui array secara rekursif dari index 0 sampai mencapai target_index (n//2)."
-
-**Trace Rekursi:**
-"Untuk array `[10, 20, 30, 40, 50]` dengan target_index=2:
-
+#### Mode 1: Simulasi dengan Visualisasi
+```bash
+python simulasi_parkir_kampus.py 1
 ```
-Call 1: find_element(0, 2)
-  → Check: 0 == 2? No
-  → Rekursi: find_element(1, 2)
+Menampilkan visualisasi real-time dengan animasi.
 
-Call 2: find_element(1, 2)
-  → Check: 1 == 2? No  
-  → Rekursi: find_element(2, 2)
+#### Mode 2: Semua Eksperimen
+```bash
+python simulasi_parkir_kampus.py 2
+```
+Menjalankan semua eksperimen dan menghasilkan grafik analisis.
 
-Call 3: find_element(2, 2)
-  → Check: 2 == 2? Yes ✓
-  → Return: arr[2] = 30
+#### Mode 3-5: Eksperimen Spesifik
+```bash
+python simulasi_parkir_kampus.py 3  # Eksperimen 1: Jumlah Kendaraan
+python simulasi_parkir_kampus.py 4  # Eksperimen 2: Durasi Parkir
+python simulasi_parkir_kampus.py 5  # Eksperimen 3: Area Parkir Tambahan
 ```
 
-"Jadi untuk n=5, ada 3 panggilan rekursif. Untuk n=100, akan ada sekitar 50 panggilan."
+### 6.3 Output
 
-"Variabel `current_index` (i) berubah setiap panggilan: 0 → 1 → 2"
-
-"Operasi dasar per panggilan:
-- 1 perbandingan (i == target?)
-- 1 penjumlahan (i+1)
-- 1 pemanggilan fungsi (overhead)
-- Total untuk n=5: ~15 operasi, kompleksitas O(N)!"
+Program akan menghasilkan:
+- **Visualisasi real-time**: Grid parkir dengan pergerakan kendaraan
+- **Grafik metrics**: Jumlah kendaraan, okupansi, waktu pencarian
+- **Grafik eksperimen**: Analisis pengaruh parameter (PNG files)
 
 ---
 
-### **Analisis Kompleksitas (Vandin):**
+## 7. Referensi
 
-"Berdasarkan analisis operasi dasar:
-
-**Iteratif:**
-- Kompleksitas waktu: O(N) - linear (loop dari 0 sampai n//2)
-- Kompleksitas ruang: O(1) - konstan
-- Operasi: Loop berjalan (n//2 + 1) kali, bergantung pada n
-- Sum of operations: T(n) = Σ(i=0 to n//2) 1 = (n//2) + 1 = O(n)
-
-**Rekursif:**
-- Kompleksitas waktu: O(N) - linear
-- Kompleksitas ruang: O(N) - karena stack rekursi
-- Operasi: ~3n/2 operasi, PROPORSIONAL dengan n"
-
-**Perbandingan:**
-- n=10: Iteratif ~15 ops vs Rekursif ~16 ops
-- n=100: Iteratif ~60 ops vs Rekursif ~156 ops
-- n=1000: Iteratif ~510 ops vs Rekursif ~1506 ops
-
-"Kedua algoritma memiliki kompleksitas O(N), tapi iteratif lebih efisien karena tidak ada overhead rekursi!"
+1. Wilensky, U. (1999). NetLogo. http://ccl.northwestern.edu/netlogo/
+2. Railsback, S. F., & Grimm, V. (2011). Agent-based and individual-based modeling: a practical introduction. Princeton University Press.
+3. Helbing, D., & Molnár, P. (1995). Social force model for pedestrian dynamics. Physical review E, 51(5), 4282.
 
 ---
 
-### **Hasil Pengujian (Vandin):**
+## Lampiran
 
-"Dari hasil benchmark dengan berbagai ukuran input:
-- Algoritma iteratif: waktu eksekusi meningkat linear dengan n (sesuai O(N))
-- Algoritma rekursif: waktu eksekusi meningkat linear dengan n (sesuai O(N))
-- Ratio: untuk n=10000, rekursif sekitar 2-3x lebih lambat dari iteratif karena overhead rekursi!"
+### File Program
+- `simulasi_parkir_kampus.py`: File utama program simulasi
+- `requirements.txt`: Dependencies yang diperlukan
 
-"Grafik menunjukkan:
-- Garis biru (iteratif): meningkat linear - O(N), tapi lebih cepat
-- Garis merah (rekursif): meningkat linear - O(N), tapi lebih lambat karena overhead"
-
----
-
-### **Kesimpulan (Semua):**
-
-"Kesimpulan:
-1. Kedua algoritma memiliki kompleksitas waktu O(N) yang sama
-2. Algoritma iteratif lebih efisien karena tidak ada overhead rekursi
-3. Algoritma iteratif lebih hemat memori: O(1) vs O(N) untuk rekursif
-4. Algoritma iteratif direkomendasikan untuk kasus ini
-5. Rekursif memiliki overhead pemanggilan fungsi dan risiko stack overflow
-6. Iteratif bisa dihitung dengan sum of operations secara jelas"
-
-"Terima kasih, kami siap menerima pertanyaan."
+### Output Eksperimen
+- `experiment_influx_rate.png`: Hasil eksperimen jumlah kendaraan
+- `experiment_duration.png`: Hasil eksperimen durasi parkir
+- `experiment_extra_parking.png`: Hasil eksperimen area parkir tambahan
 
 ---
 
-## 🎯 Tips Presentasi
-
-1. **Siapkan contoh konkret** dengan array kecil (n=5 atau n=6)
-2. **Tulis trace rekursi di papan/PPT** saat menjelaskan
-3. **Highlight operasi dasar** dengan warna atau penekanan
-4. **Siapkan jawaban** untuk pertanyaan tentang variabel i (current_index)
-5. **Demonstrasi program** di akhir untuk menunjukkan hasil real
-
-**Selamat presentasi! 🎉**
-
+**Disusun oleh:** [Nama Kelompok]  
+**Tanggal:** [Tanggal]  
+**Versi:** 1.0
